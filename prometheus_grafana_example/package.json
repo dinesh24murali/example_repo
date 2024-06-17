@@ -1,0 +1,15 @@
+{
+  "name": "docker_swarm_example",
+  "version": "1.0.0",
+  "description": "Docker swarm on a simple NodeJS Application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Dinesh",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

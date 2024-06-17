@@ -1,0 +1,97 @@
+version: "3.9"
+
+services:
+  traefik:
+    image: traefik:v2.10.7
+    networks:
+      - sample-net
+    ports:
+      - "80:80"
+      - 8082:8082
+    volumes:
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  nodeapp:
+    networks:
+      - sample-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-redirect.service=nodeapp-service"
+      - "traefik.http.routers.api-redirect.entryPoints=web"
+      - "traefik.http.routers.api-redirect.rule=Host(`node.localhost`)"
+      - "traefik.http.services.nodeapp-service.loadBalancer.server.port=3000"
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: ["npm", "run", "start"]
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    labels:
+      - "traefik.enable=true"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
+    networks:
+      - sample-net
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "prometheus-job=cadvisor"
+    networks:
+      - sample-net
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /:/host:ro,rslave
+    command:
+      - "--path.rootfs=/host"
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    networks:
+      - sample-net
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - 3000:3000
+    networks:
+      - sample-net
+
+volumes:
+  prom_data:
+
+networks:
+  sample-net:

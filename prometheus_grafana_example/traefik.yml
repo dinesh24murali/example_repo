@@ -1,0 +1,36 @@
+providers:
+  docker:
+    network: sample-net
+    exposedbydefault: false
+
+# accessLog: {}
+
+# API and dashboard configuration
+api:
+  insecure: true
+  dashboard: true
+
+log:
+  level: DEBUG
+
+entryPoints:
+  web:
+    address: :80
+
+  websecure:
+    address: :443
+
+  metrics:
+    address: :8082
+
+metrics:
+  prometheus:
+    addRoutersLabels: true
+    addServicesLabels: true
+    addEntryPointsLabels: true
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.2
+      - 5.0
+    entryPoint: metrics
