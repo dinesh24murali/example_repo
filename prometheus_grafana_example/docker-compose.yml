@@ -19,7 +19,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api-redirect.service=nodeapp-service"
       - "traefik.http.routers.api-redirect.entryPoints=web"
-      - "traefik.http.routers.api-redirect.rule=Host(`node.localhost`)"
+      - "traefik.http.routers.api-redirect.rule=PathPrefix(`/`)"
       - "traefik.http.services.nodeapp-service.loadBalancer.server.port=3000"
     build:
       context: .
