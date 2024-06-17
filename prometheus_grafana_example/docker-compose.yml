@@ -34,8 +34,6 @@ services:
     image: prom/prometheus
     ports:
       - 9090:9090
-    labels:
-      - "traefik.enable=true"
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     restart: unless-stopped
