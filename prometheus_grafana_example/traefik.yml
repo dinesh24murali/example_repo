@@ -26,7 +26,6 @@ entryPoints:
 metrics:
   prometheus:
     addRoutersLabels: true
-    addServicesLabels: true
     addEntryPointsLabels: true
     buckets:
       - 0.1
