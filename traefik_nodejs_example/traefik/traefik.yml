@@ -1,0 +1,42 @@
+# providers:
+#   docker:
+#     swarmMode: true
+#     network: chat-net
+#     exposedbydefault: true
+
+# accessLog: {}
+
+# API and dashboard configuration
+api:
+  insecure: true
+  dashboard: true
+
+log:
+  level: DEBUG
+
+entryPoints:
+  web:
+    address: :80
+
+  websecure:
+    address: :443
+
+# Not tested
+# Some sample config incase you need to add the certificate manually.
+#
+# tls:
+#   certificates:
+#     - certFile: /etc/letsencrypt/ssl/fullchain.pem
+#       keyFile: /etc/letsencrypt/ssl/privkey.pem
+#       stores:
+#         - default
+#   stores:
+#     default:
+#       defaultCertificate:
+#         certFile: /etc/letsencrypt/ssl/fullchain.pem
+#         keyFile: /etc/letsencrypt/ssl/privkey.pem
+#       defaultGeneratedCert:
+#         resolver: chat_resolver
+#         domain:
+#           main: testrunner45.info
+

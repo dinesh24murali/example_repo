@@ -1,19 +1,25 @@
 version: "3.9"
 services:
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: zookeeper:latest
+    container_name: zookeeper_example
     ports:
       - "2181:2181"
     restart: unless-stopped
 
   kafka:
-    image: wurstmeister/kafka:2.13-2.8.1
+    image: apache/kafka:latest
+    container_name: kafka_example
     ports:
-      - "9092"
+      - "9092:9092"
     environment:
-      DOCKER_API_VERSION: 1.22
-      KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: ${HOST_IP}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      KAFKA_CREATE_TOPICS: "topic-test:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
