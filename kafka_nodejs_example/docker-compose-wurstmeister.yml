@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: zookeeper_example
+    network_mode: host
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    network_mode: host
+    container_name: kafka_example
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    expose:
+      - "9093"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: localhost:2181
+      KAFKA_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./kafka-input:/mnt/shared/config
