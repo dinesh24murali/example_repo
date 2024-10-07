@@ -68,3 +68,9 @@ If the controller broker fails, another broker is automatically elected to take 
 They allow you to write distributed applications and microservices that read, write, and process streams of events in parallel, at scale, and in a fault-tolerant manner even in the case of network problems or machine failures.
 
 Producers are those client applications that publish (write) events to Kafka, and consumers are those that subscribe to (read and process) these events.
+
+# Reference links
+
+https://hub.docker.com/r/apache/kafka
+https://romanglushach.medium.com/the-evolution-of-kafka-architecture-from-zookeeper-to-kraft-f42d511ba242
+https://jskim1991.medium.com/docker-docker-compose-example-for-kafka-zookeeper-and-schema-registry-c516422532e7
