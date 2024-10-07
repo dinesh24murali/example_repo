@@ -2,16 +2,20 @@
 
 There are 3 docker files in this project each of them use a different docker image. All of these files work, they have the same set of commands to run them.
 
-**docker-compose-apache-KRaft.yml**
-- This file uses the official Kafka image from apache (apache/kafka:3.8.0).
-- This image either doesn't support Kafka zookeeper setup out of the box or I can't find the instructions
+**docker-compose.yml**
+- This file uses the official Kafka image from apache (apache/kafka:3.8.0). With Kafka version 4 they are planning to remove completely and only use `KRaft`
 - It does support `KRaft` which is zookeeper's replacement
+- This image either doesn't support Kafka zookeeper setup out of the box or I can't find the instructions
+
+**docker-compose-multi-node.yml**
+- This file uses the official Kafka image from apache (apache/kafka:3.8.0) with multiple nodes (1 controller node and 2 broker nodes)
+- The consumers and the producers need to use the port exposed by the `broker` nodes. In this example the two brokers are running at ports `9092`, and `39092`. You can use any of these two instants/ports in the `broker` section in `consumer.js` and `producer.js`
 
 **docker-compose-wurstmeister.yml**
 - This file uses the kafka image `wurstmeister/kafka` which is 2 years old. I got this from `kafkajs` documentation.
 - There is a image for zookeeper that works out of the box with this image called `wurstmeister/zookeeper`. The `wurstmeister/zookeeper` image is 6 years old.
 
-**docker-compose.yml**
+**docker-compose-zookeeper.yml**
 - This file uses the kafka image `confluentinc/cp-kafka` which is the updated image. It also has the updated zookeeper counter part image `confluentinc/cp-zookeeper`.
 - [confluent](https://www.confluent.io/?session_ref=https://hub.docker.com/&_ga=2.116374657.64705551.1728091888-1214419537.1728091888&_gl=1*11s52fw*_gcl_au*NjQ2MjUwNDAzLjE3MjgwOTE4ODg.*_ga*MTIxNDQxOTUzNy4xNzI4MDkxODg4*_ga_D2D3EGKSGD*MTcyODE0ODUxNS40LjEuMTcyODE0ODU2Ny44LjAuMA..) is the company who invented `Kafka`.
 
@@ -32,6 +36,6 @@ This might crash at the first time because it takes a few seconds for kafka and 
 node producer.js
 ```
 If you switch to the consumer you should be able to see a event getting logged
-```bash
-{ value: 'Hello KafkaJS junk!' }
+```json
+{ "value": "Hello KafkaJS junk!" }
 ```
