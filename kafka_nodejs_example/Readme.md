@@ -68,11 +68,3 @@ If the controller broker fails, another broker is automatically elected to take 
 They allow you to write distributed applications and microservices that read, write, and process streams of events in parallel, at scale, and in a fault-tolerant manner even in the case of network problems or machine failures.
 
 Producers are those client applications that publish (write) events to Kafka, and consumers are those that subscribe to (read and process) these events.
-
-# How to run?
-
-There is a separate file that explains each file.
-
-# Points to note:
-
-- Kafka can be deployed with multiple `broker` nodes and single `controller` node. When we initialize the cluster, all the available kafka nodes in the network will do a vote to elect the `controller node`.  Even if you have one kafka server in you cluster, it will still do the vote to select the `controller node`. This takes a few seconds to decide the `controller node`. The election process will get triggered after the server is accessed for the first time after initialization. So it is best to initialize the consumer first, and not trigger the producer imidiately after the server starts.

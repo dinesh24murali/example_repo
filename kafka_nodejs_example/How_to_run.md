@@ -4,8 +4,10 @@ There are 3 docker files in this project each of them use a different docker ima
 
 **docker-compose.yml**
 - This file uses the official Kafka image from apache (apache/kafka:3.8.0). With Kafka version 4 they are planning to remove completely and only use `KRaft`
-- It does support `KRaft` which is zookeeper's replacement
-- This image either doesn't support Kafka zookeeper setup out of the box or I can't find the instructions
+- It does support `KRaft` which is zookeeper's replacement.
+
+**docker-compose-apache-zookeeper.yml**
+- This file uses the official Kafka image from apache (apache/kafka:3.8.0) and the official zookeeper image (zookeeper:3.9.2). With Kafka version 4 they are planning to remove completely and only use `KRaft`.
 
 **docker-compose-multi-node.yml**
 - This file uses the official Kafka image from apache (apache/kafka:3.8.0) with multiple nodes (1 controller node and 2 broker nodes)
