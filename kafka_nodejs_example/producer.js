@@ -12,7 +12,7 @@ const kafka = new Kafka({
   await producer.connect();
   await producer.send({
     topic: "test-topic",
-    messages: [{ value: "Hello KafkaJS junk!" }],
+    messages: [{ value: "Hello KafkaJS!" }],
   });
 
   await producer.disconnect();

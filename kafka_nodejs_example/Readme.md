@@ -71,6 +71,15 @@ Producers are those client applications that publish (write) events to Kafka, an
 
 # Reference links
 
+**Blog regarding Zookeeper depreciation**
 https://hub.docker.com/r/apache/kafka
 https://romanglushach.medium.com/the-evolution-of-kafka-architecture-from-zookeeper-to-kraft-f42d511ba242
+
+**Docker-compose reference**
 https://jskim1991.medium.com/docker-docker-compose-example-for-kafka-zookeeper-and-schema-registry-c516422532e7
+
+**Tips on how to choose kafka topic name**
+https://dev.to/devshawn/apache-kafka-topic-naming-conventions-3do6
+
+**Stackoverflow thread on kafka topic creation best practice**
+https://stackoverflow.com/questions/48498414/kafka-topic-creation-best-practice
