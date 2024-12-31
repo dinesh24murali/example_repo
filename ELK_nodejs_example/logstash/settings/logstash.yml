@@ -1,0 +1,5 @@
+http.host: 0.0.0.0
+node.name: ${NODE_NAME}
+xpack.monitoring.elasticsearch.hosts:
+- https://172.29.0.2:9200
+xpack.monitoring.enabled: ${xpack.monitoring.enabled}

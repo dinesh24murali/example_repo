@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+
+  nodeapp:
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    logging:  # <----------------- add the logging section
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:5044"
+    network_mode: host
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: ["npm", "run", "start"]
