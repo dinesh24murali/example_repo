@@ -1,5 +1,6 @@
 # Single node elastic search
 
+0. Optional step
 ```bash
 sudo sysctl -w vm.max_map_count=262144
 ```
@@ -26,18 +27,25 @@ docker run --name es01 --net elastic -p 9200:9200 -it -m 1GB docker.elastic.co/e
 ```bash
 docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic
 ```
-
-SAyYi6KnrdZLJpy*jURT
+It will look something like this:
+```
+password
+```
 
 5. Get enrolment token
 ```bash
 docker exec -it es01 /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
 ```
-eyJ2ZXIiOiI4LjE0LjAiLCJhZHIiOlsiMTcyLjI5LjAuMjo5MjAwIl0sImZnciI6ImNiYjE1NzljNzE2YmRhN2U4ZDcxOTMyN2U3NThhY2EwMWQ2NDFkOTZjZDA0ZDE1OGJlYzA0NjBiMDQ1OThiM2EiLCJrZXkiOiJjWGNGR3BRQmpqcFY2Y2hCbWViNDpQUm5YenhuSFRzV09CalROV0VZSmdnIn0=
+It will look something like this:
+```
+eyJ2ZXIiOiI4LjE0LjA0ZDAiLCJrZXkiOiI4Q21rY1pRQnR1MXpxVTJ1VWhOdTpBR3E3QnIyc1RsT01sdE5hQ0YtTEFRIn0=
+```
 
-6. Add environment variable
-```bash
-export ELASTIC_PASSWORD="SAyYi6KnrdZLJpy*jURT"
+6. Create the following directories from where you run the command.
+```
+./logstash/credentials/ca/
+./logstash/pipeline
+./logstash/settings
 ```
 
 7. Get ssl certificate
@@ -52,15 +60,71 @@ docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt ./logstash/cred
 docker run --name kib01 --net elastic -p 5601:5601 docker.elastic.co/kibana/kibana:8.17.0
 ```
 
-9. Run logstash
-```bash
-docker run --rm -it --net elastic -v ./logstash/pipeline/:/usr/share/logstash/pipeline/ -v ./logstash/settings/logstash.yml:/usr/share/logstash/config/logstash.yml -v ./logstash/credentials/:/usr/share/logstash/certs -e ELASTIC_USER="elastic" -e ELASTIC_PASSWORD="SAyYi6KnrdZLJpy*jURT" -e ELASTIC_HOSTS="https://172.29.0.2:9200" -e xpack.monitoring.enabled=false -e NODE_NAME="logstash" -p 5044:5044/udp docker.elastic.co/logstash/logstash:8.17.0
+The kibana container will print out a URL that you can access through the browser. It will look like this:
+
+```
+i Kibana has not been configured.
+
+Go to http://0.0.0.0:5601/?code=234301 to get started.
 ```
 
-curl -X PUT --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books?pretty
+9. To run logstash you need to make some changes to a few configurations. You need to get the IP address of the elastic search container. Use the following command:
 
+```bash
+docker inspect es01 | grep "IPAddress"
+```
+It will printout something like the following:
+```
+"SecondaryIPAddresses": null,
+"IPAddress": "",
+"IPAddress": "111.11.1.1",
+```
 
-curl -X POST --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books/_doc?pretty -H 'Content-Type: application/json' -d'
+10. Open `./logstash/pipeline/logstash.conf` file, and update the output section where we have the password. Also update the IP address of the elastic container under the hosts section:
+```
+output {
+  elasticsearch {
+    index => "logstash-%{+YYYY.MM.dd}"
+    hosts => ["https://111.11.1.1:9200"] <------------------ Change the IP address here
+    user => "elastic"
+    password => "password" <------------------ Change the password
+    ssl_enabled => true
+    cacert => "/usr/share/logstash/certs/ca/ca.crt"
+  }
+}
+```
+
+11. This is the command the start logstash. Remember to run this command from the folder where we previously created the logstash folder. Update the IP address of elastic in the `ELASTIC_HOSTS` environment variable, and update the elasticsearch password in the `ELASTIC_PASSWORD` environment variable.
+```bash
+docker run --rm -it --net elastic \
+-v ./logstash/pipeline/:/usr/share/logstash/pipeline/ \
+-v ./logstash/settings/logstash.yml:/usr/share/logstash/config/logstash.yml \
+-v ./logstash/credentials/:/usr/share/logstash/certs \
+-e ELASTIC_USER="elastic" \
+-e ELASTIC_PASSWORD="password" \ <------------------ Change the password
+-e ELASTIC_HOSTS="https://111.11.1.1:9200" \ <------------------ Change the IP address here
+-e xpack.monitoring.enabled=false \
+-e NODE_NAME="logstash" \
+-p 5044:5044/udp \
+docker.elastic.co/logstash/logstash:8.17.0
+```
+
+# Adding data to elastic search
+
+Add the following environment variable to the terminal
+```bash
+export ELASTIC_PASSWORD="password"
+```
+
+Remember to run the following commands from the same directory where the ssl certificate is present. If you were following the above steps the ssl certificate will be present in `./logstash/credentials/ca`
+
+1. Create a new index called `books`
+```bash
+curl -X PUT --cacert ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books?pretty
+```
+2. Add data to the `book` index:
+```bash
+curl -X POST --cacert ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books/_doc?pretty -H 'Content-Type: application/json' -d'
 {
   "name": "Snow Crash",
   "author": "Neal Stephenson",
@@ -68,8 +132,9 @@ curl -X POST --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost
   "page_count": 470
 }
 '
-
-
+```
+4. Bulk add data to the `book` index:
+```bash
 curl -X POST --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/_bulk?pretty -H 'Content-Type: application/json' -d'
 { "index" : { "_index" : "books" } }
 {"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585}
@@ -82,11 +147,13 @@ curl -X POST --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost
 { "index" : { "_index" : "books" } }
 {"name": "The Handmaids Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311}
 '
-
-
+```
+5. Get the field mappings
+```bash
 curl -X GET --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books/_mapping?pretty
-
-
+```
+6. Get the field mappings
+```bash
 curl -X PUT --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/my-explicit-mappings-books?pretty -H 'Content-Type: application/json' -d'
 {
   "mappings": {
@@ -100,10 +167,10 @@ curl -X PUT --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:
   }
 }
 '
-
-curl -X GET --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books/_search?pretty
-
-curl -X GET --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books/_search?pretty -H 'Content-Type: application/json' -d'
+```
+7. Query elastic search:
+```bash
+curl -X GET --cacert ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books/_search?pretty -H 'Content-Type: application/json' -d'
 {
   "query": {
     "match": {
@@ -112,3 +179,16 @@ curl -X GET --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:
   }
 }
 '
+```
+
+8. Update a document:
+Remember to replace `<ID of document>` with the ID of the document.
+```bash
+curl -X POST --cacert ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200/books/_update/<ID of document> -H 'Content-Type: application/json' -d'
+{
+  "doc": {
+    "field_to_update": "new_value"
+  }
+}
+'
+```
