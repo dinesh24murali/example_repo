@@ -100,11 +100,6 @@ docker run --rm -it --net elastic \
 -v ./logstash/pipeline/:/usr/share/logstash/pipeline/ \
 -v ./logstash/settings/logstash.yml:/usr/share/logstash/config/logstash.yml \
 -v ./logstash/credentials/:/usr/share/logstash/certs \
--e ELASTIC_USER="elastic" \
--e ELASTIC_PASSWORD="password" \ <------------------ Change the password
--e ELASTIC_HOSTS="https://111.11.1.1:9200" \ <------------------ Change the IP address here
--e xpack.monitoring.enabled=false \
--e NODE_NAME="logstash" \
 -p 5044:5044/udp \
 docker.elastic.co/logstash/logstash:8.17.0
 ```

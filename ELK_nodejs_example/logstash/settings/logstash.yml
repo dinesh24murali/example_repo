@@ -1,5 +1,7 @@
 http.host: 0.0.0.0
-node.name: ${NODE_NAME}
+node.name: logstash
 xpack.monitoring.elasticsearch.hosts:
 - https://172.29.0.2:9200
-xpack.monitoring.enabled: ${xpack.monitoring.enabled}
+xpack.monitoring.enabled: false
+api.auth.basic.username: elastic
+api.auth.basic.password: wXeLS=Dq_HrtmEiMDE9g
