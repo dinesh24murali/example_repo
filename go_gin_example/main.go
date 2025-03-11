@@ -1,7 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"go_gin_example/student"
+
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
-	fmt.Println("Hi")
+
+	r := gin.Default()
+
+	student.StudentRegister(r.Group("/student"))
+
+	r.Run(":8080")
 }

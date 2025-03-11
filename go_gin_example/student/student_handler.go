@@ -9,9 +9,9 @@ import (
 var students = []Student{}
 var nextID = 2
 
-func CreateTodo(c *gin.Context) {
-	var todo Student
-	if err := c.ShouldBindJSON(&todo); err != nil {
+func AddStudent(c *gin.Context) {
+	var student Student
+	if err := c.ShouldBindJSON(&student); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
